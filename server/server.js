@@ -38,6 +38,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 首頁直接開管理後台（生日頁面在 GitHub Pages；本機鏡像保留在 /index.html）
+app.get(['/', '/admin'], (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+
 // All-in-One：同時伺服前端靜態檔案（repo 根目錄）
 // 安全：/server 底下有 .env 與訂閱資料，必須擋掉
 app.use('/server', (req, res) => res.status(404).send('not found'));
@@ -53,9 +56,6 @@ app.use(
 );
 
 app.get('/health', (req, res) => res.send('CC birthday push server 💕'));
-
-// 管理後台 UI（頁面公開，但所有操作都需要 ADMIN_KEY）
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 app.get('/api/stats', (req, res) => {
   if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
