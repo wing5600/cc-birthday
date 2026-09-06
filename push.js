@@ -1,6 +1,6 @@
 // PWA 註冊 + 推播通知訂閱
 // 後端網址（自有伺服器）
-const BACKEND_URL = 'https://panel.sunhingindo.com';
+const BACKEND_URL = 'https://cc.cryhan.com';
 
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =
@@ -45,13 +45,25 @@ if (bellBtn) {
   });
 }
 
+// CC 點「點我開啟」進入頁面後，自動彈出通知詢問（iOS 需先加入主畫面）
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
+  startBtn.addEventListener('click', () => {
+    setTimeout(() => {
+      if (isIOS && !isStandalone) showA2HSHint();
+      else showNotifyPrompt();
+    }, 1600);
+  });
+}
+
 async function enableNotifications() {
-  if (!('Notification' in window) || !('PushManager' in window) || !swReg) {
+  if (!('Notification' in window) || !('PushManager' in window)) {
     bellBtn.textContent = '⚠️ 此裝置不支援通知';
     return;
   }
   try {
     bellBtn.textContent = '⏳ 開啟中…';
+    swReg = swReg || (await navigator.serviceWorker.ready);
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') {
       bellBtn.textContent = '🔕 通知被拒絕';
@@ -81,6 +93,33 @@ function urlB64ToUint8Array(base64String) {
   const arr = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
   return arr;
+}
+
+function showNotifyPrompt() {
+  if (document.getElementById('notifyPrompt')) return;
+  if (!('Notification' in window) || Notification.permission !== 'default') return;
+  const el = document.createElement('div');
+  el.id = 'notifyPrompt';
+  el.style.cssText =
+    'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;' +
+    'width:min(320px,86vw);padding:22px 20px;border-radius:20px;text-align:center;' +
+    'background:rgba(30,16,52,.95);border:1px solid rgba(255,158,203,.45);' +
+    'color:#ffe9f4;box-shadow:0 12px 40px rgba(0,0,0,.5);' +
+    'font-family:"Noto Sans TC",sans-serif;';
+  el.innerHTML =
+    '<div style="font-size:44px;">🎁</div>' +
+    '<p style="font-size:1.05rem;font-weight:700;margin:10px 0 4px;">要開啟通知嗎？</p>' +
+    '<p style="font-size:.88rem;color:#cbb8e8;line-height:1.7;">生日當天的驚喜訊息<br>會第一時間送到妳手上 💕</p>' +
+    '<div style="display:flex;gap:10px;margin-top:16px;">' +
+    '<button id="npNo" style="flex:1;padding:12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#cbb8e8;font-size:.95rem;font-family:inherit;cursor:pointer;">先不用</button>' +
+    '<button id="npYes" style="flex:2;padding:12px;border-radius:999px;border:none;background:linear-gradient(135deg,#ff9ecb,#ffd58a);color:#3a1b3d;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;">好呀 🔔</button>' +
+    '</div>';
+  document.body.appendChild(el);
+  document.getElementById('npYes').addEventListener('click', () => {
+    el.remove();
+    enableNotifications();
+  });
+  document.getElementById('npNo').addEventListener('click', () => el.remove());
 }
 
 function showA2HSHint() {

@@ -1,4 +1,4 @@
 # 備用：若之後想用 Caddy 自動 HTTPS，直接用這個檔案即可
-panel.sunhingindo.com {
+cc.cryhan.com {
 	reverse_proxy 127.0.0.1:3456
 }
