@@ -38,7 +38,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('CC birthday push server 💕'));
+// All-in-One：同時伺服前端靜態檔案（repo 根目錄）
+// 安全：/server 底下有 .env 與訂閱資料，必須擋掉
+app.use('/server', (req, res) => res.status(404).send('not found'));
+app.use(
+  express.static(path.join(__dirname, '..'), {
+    dotfiles: 'ignore',
+    index: 'index.html',
+    setHeaders: (res, filePath) => {
+      // service worker 不可被快取，否則更新會延遲
+      if (filePath.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+    }
+  })
+);
+
+app.get('/health', (req, res) => res.send('CC birthday push server 💕'));
 
 app.get('/vapidPublicKey', (req, res) => res.type('text/plain').send(VAPID_PUBLIC_KEY));
 

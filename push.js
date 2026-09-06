@@ -1,6 +1,9 @@
 // PWA 註冊 + 推播通知訂閱
-// ⚠️ 後端部署完成後，把下面換成你的後端網址（例如 https://cc-birthday-push.onrender.com）
-const BACKEND_URL = 'https://cc-birthday-push.onrender.com';
+// 自有網域 All-in-One 部署時，前後端同網域，自動用 location.origin 免設定；
+// 若是從 GitHub Pages 開啟，才需要指定後端網址（把下面換成你的網域）
+const BACKEND_URL = location.hostname.endsWith('github.io')
+  ? 'https://cc.example.com'
+  : location.origin;
 
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =

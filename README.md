@@ -35,26 +35,66 @@ gh api repos/{owner}/cc-birthday/pages -X POST -f "source[branch]=main" -f "sour
 
 網址會是 `https://<你的帳號>.github.io/cc-birthday/`
 
-## 部署後端（Netlify 免費方案，免信用卡）
+## 部署到自己的伺服器（All-in-One，推薦）
 
-後端是三支 Netlify Functions（`netlify/functions/`）+ Netlify Blobs 存訂閱資料：
+`server/server.js` 會同時伺服前端網頁和推播 API，一個 Node 程式搞定。
 
-1. 到 [netlify.com](https://www.netlify.com) 用 **GitHub 登入**（免費、不用信用卡）
-2. 在本專案目錄執行：
-   ```bash
-   npx netlify login                     # 瀏覽器授權
-   npx netlify sites:create --name cc-birthday-push
-   npx netlify env:set VAPID_PUBLIC_KEY "（server/.env 裡的值）"
-   npx netlify env:set VAPID_PRIVATE_KEY "（server/.env 裡的值）"
-   npx netlify env:set ADMIN_KEY "（server/.env 裡的值）"
-   npx netlify deploy --prod
-   ```
-3. 得到網址 `https://cc-birthday-push.netlify.app` 後，填進：
-   - `push.js` 最上面的 `BACKEND_URL`（改完 commit + push，GitHub Pages 會自動更新）
-   - `server/.env` 的 `BACKEND_URL`（本機發通知用）
+### 1. 在伺服器上安裝 Node.js 18+ 並拉取程式碼
 
-> 訂閱資料存在 Netlify Blobs，不會因休眠遺失；PWA 每次打開也會自動重新訂閱補上。
-> `server/` 裡的 Express 版本是本地開發用的替代方案，雲端用 Netlify Functions 即可。
+```bash
+git clone https://github.com/wing5600/cc-birthday.git /opt/cc-birthday
+cd /opt/cc-birthday/server
+npm install
+cp .env.example .env   # 然後編輯 .env，填入金鑰（值見你 Mac 上的 server/.env）
+```
+
+### 2. 用 systemd 讓它常駐
+
+```bash
+sudo cp /opt/cc-birthday/cc-birthday.service /etc/systemd/system/
+# 視需要編輯裡面的 WorkingDirectory / node 路徑（which node 可查）
+sudo systemctl enable --now cc-birthday
+sudo systemctl status cc-birthday   # 確認 active (running)
+```
+
+### 3. 用 Caddy 掛上 HTTPS（自動申請 Let's Encrypt 憑證）
+
+```bash
+sudo apt install caddy -y    # Debian/Ubuntu；其他發行版見 caddyserver.com
+sudo cp /opt/cc-birthday/Caddyfile /etc/caddy/Caddyfile
+sudo nano /etc/caddy/Caddyfile   # 把 cc.example.com 換成你的網域
+sudo systemctl reload caddy
+```
+
+記得防火牆開放 80 / 443 port。完成後 `https://你的網域` 就是生日頁面，
+API 也在同網域下（`/vapidPublicKey`、`/subscribe`、`/notify`），免設定 CORS。
+
+> 已用 Nginx 的話，只要加一個 site：`listen 443 ssl;` 配上憑證，
+> `location / { proxy_pass http://127.0.0.1:3000; }` 即可。
+
+### 4. 更新程式碼
+
+```bash
+cd /opt/cc-birthday && git pull && sudo systemctl restart cc-birthday
+```
+
+---
+
+<details>
+<summary>替代方案：Netlify Functions（免信用卡，但要多註冊帳號）</summary>
+
+`netlify/functions/` 裡有現成的 Netlify 版本（Functions + Blobs）：
+
+```bash
+npx netlify login
+npx netlify sites:create --name cc-birthday-push
+npx netlify env:set VAPID_PUBLIC_KEY "..."   # 值見 server/.env
+npx netlify env:set VAPID_PRIVATE_KEY "..."
+npx netlify env:set ADMIN_KEY "..."
+npx netlify deploy --prod
+```
+
+</details>
 
 ## CC 的 iPhone 設定（iOS 16.4 以上）
 

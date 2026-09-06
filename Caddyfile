@@ -1,0 +1,5 @@
+# 把 cc.example.com 換成你的網域
+# Caddy 會自動申請 + 續期 Let's Encrypt HTTPS 憑證
+cc.example.com {
+	reverse_proxy 127.0.0.1:3000
+}

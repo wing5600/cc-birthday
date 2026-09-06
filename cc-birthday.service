@@ -1,0 +1,17 @@
+# systemd 服務：讓推播伺服器開機自動啟動、當掉自動重開
+# 放到 /etc/systemd/system/cc-birthday.service
+# 注意：WorkingDirectory 與 node 路徑請依你的伺服器調整（which node 可查路徑）
+[Unit]
+Description=CC Birthday PWA + push server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cc-birthday/server
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
