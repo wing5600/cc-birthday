@@ -18,6 +18,14 @@ REPO="https://github.com/wing5600/cc-birthday.git"
 APP_DIR="/opt/cc-birthday"
 PORT=3000
 
+# ---------- aaPanel 偵測 ----------
+if [ -d /www/server/panel ]; then
+  warn "偵測到 aaPanel！建議改用 aaPanel 專用流程（網站/SSL/反向代理在面板操作）："
+  echo "      bash <(curl -fsSL https://raw.githubusercontent.com/wing5600/cc-birthday/main/setup-aapanel.sh)"
+  read -rp "仍要用本腳本（systemd + 可選 Caddy，不經面板）繼續嗎？[y/N]: " FORCE
+  [ "${FORCE:-n}" = "y" ] || [ "${FORCE:-n}" = "Y" ] || exit 0
+fi
+
 # ---------- 權限 ----------
 if [ "$(id -u)" -ne 0 ]; then
   if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; else
