@@ -35,47 +35,39 @@ gh api repos/{owner}/cc-birthday/pages -X POST -f "source[branch]=main" -f "sour
 
 網址會是 `https://<你的帳號>.github.io/cc-birthday/`
 
-## 部署到 aaPanel 伺服器（推薦流程）
+## 部署到 aaPanel + Cloudflare（推薦流程）
 
-前端在 GitHub Pages，後端在 aaPanel 伺服器。網域：`panel.sunhingindo.com`
+前端在 GitHub Pages，後端在 aaPanel 伺服器，SSL 由 Cloudflare 代理提供。
 
-### 1. SSH 登入伺服器，跑應用程式安裝腳本
+### 1. SSH 登入伺服器，跑一條指令
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/wing5600/cc-birthday/main/setup-aapanel.sh)
 ```
 
-會自動完成：程式碼放到 `/www/wwwroot/cc-birthday` → 安裝依賴 → 產生金鑰寫入 `.env` → 顯示**管理密碼**。
+自動完成：程式碼放到 `/www/wwwroot/cc-birthday` → 安裝依賴 → 產生金鑰 →
+**systemd 啟動後端（port 3000，開機自啟）** → 顯示**管理密碼**。
 
-### 2. aaPanel 建立 Node 專案
+### 2. Cloudflare 加 DNS 紀錄
 
-面板 →「網站」→「Node 專案」→「新增 Node 專案」：
+CF Dashboard → DNS → Add record：類型 `A`、名稱例如 `cc`、IPv4 填伺服器 IP、
+**Proxy 開啟（橘雲）**——SSL 就自動有了。
 
-| 欄位 | 值 |
-|---|---|
-| 網域 | `panel.sunhingindo.com` |
-| 專案目錄 | `/www/wwwroot/cc-birthday/server` |
-| 啟動檔案 | `server.js` |
-| 埠號 | `3000` |
-| Node 版本 | 18 以上（沒有就先在「軟體商店 → Node 版本管理器」安裝） |
+> CF 的 SSL/TLS 模式設為 **Flexible**（或 Full）即可。
 
-建立後面板會自動配好 Nginx 反向代理。
+### 3. aaPanel 加反向代理
 
-> ⚠️ 如果你的 aaPanel 本身就是用 `panel.sunhingindo.com` 的 443 port 登入，
-> 請改用另一個子網域（例如 `cc.sunhingindo.com`）避免把面板蓋掉。
-
-### 3. 申請 SSL
-
-網站設定 →「SSL」→「Let's Encrypt」→ 申請 → 開啟「強制 HTTPS」。
+「網站」→ 新增該子網域的網站 → 網站設定 →「反向代理」→ 新增 →
+目標 URL 填 `http://127.0.0.1:3000` → 儲存。
 
 ### 4. 驗證
 
 ```bash
-curl https://panel.sunhingindo.com/health
+curl https://你的子網域/health
 # 回應 CC birthday push server 💕 即成功
 ```
 
-後台管理介面：`https://panel.sunhingindo.com/admin`（輸入管理密碼即可發通知）
+後台管理介面：`https://你的子網域/admin`（輸入管理密碼即可發通知）
 
 ---
 
