@@ -35,44 +35,40 @@ gh api repos/{owner}/cc-birthday/pages -X POST -f "source[branch]=main" -f "sour
 
 網址會是 `https://<你的帳號>.github.io/cc-birthday/`
 
-## 部署到自己的伺服器（All-in-One，推薦）
+## 部署到自己的伺服器（All-in-One 安裝腳本）
 
-`server/server.js` 會同時伺服前端網頁和推播 API，一個 Node 程式搞定。
+前端在 GitHub Pages，後端跑在你自己的伺服器（Ubuntu/Debian）。
+一條指令全自動：安裝 Node.js、Caddy（自動 HTTPS）、systemd 常駐、產生金鑰：
 
-### 1. 在伺服器上安裝 Node.js 18+ 並拉取程式碼
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/wing5600/cc-birthday/main/setup.sh)
+```
+
+腳本會問你的網域（DNS 需先指向伺服器 IP），跑完後：
+
+1. **把網域填進前端**：編輯 GitHub 上的 [`push.js`](https://github.com/wing5600/cc-birthday/edit/main/push.js)，
+   把 `BACKEND_URL` 改成 `https://你的網域`，commit 後等約 1 分鐘
+2. **開後台**：`https://你的網域/admin` → 輸入管理密碼（腳本結尾會顯示）就能發通知
+3. 伺服器本身也會鏡像伺服完整頁面：`https://你的網域/`
+
+### 後台管理介面（/admin）
+
+- 輸入 ADMIN_KEY 登入（會記在瀏覽器裡）
+- 顯示已訂閱裝置數
+- 快速訊息按鈕 + 自訂標題/內容，一鍵發送
+- 手機瀏覽器也能用
+
+### 手動部署（不想用腳本的話）
 
 ```bash
 git clone https://github.com/wing5600/cc-birthday.git /opt/cc-birthday
-cd /opt/cc-birthday/server
-npm install
-cp .env.example .env   # 然後編輯 .env，填入金鑰（值見你 Mac 上的 server/.env）
-```
-
-### 2. 用 systemd 讓它常駐
-
-```bash
-sudo cp /opt/cc-birthday/cc-birthday.service /etc/systemd/system/
-# 視需要編輯裡面的 WorkingDirectory / node 路徑（which node 可查）
+cd /opt/cc-birthday/server && npm install && cp .env.example .env  # 編輯 .env 填金鑰
+sudo cp ../cc-birthday.service /etc/systemd/system/   # 視情況修改路徑
 sudo systemctl enable --now cc-birthday
-sudo systemctl status cc-birthday   # 確認 active (running)
+# Caddy：把 Caddyfile 的網域改掉後放到 /etc/caddy/Caddyfile，sudo systemctl reload caddy
 ```
 
-### 3. 用 Caddy 掛上 HTTPS（自動申請 Let's Encrypt 憑證）
-
-```bash
-sudo apt install caddy -y    # Debian/Ubuntu；其他發行版見 caddyserver.com
-sudo cp /opt/cc-birthday/Caddyfile /etc/caddy/Caddyfile
-sudo nano /etc/caddy/Caddyfile   # 把 cc.example.com 換成你的網域
-sudo systemctl reload caddy
-```
-
-記得防火牆開放 80 / 443 port。完成後 `https://你的網域` 就是生日頁面，
-API 也在同網域下（`/vapidPublicKey`、`/subscribe`、`/notify`），免設定 CORS。
-
-> 已用 Nginx 的話，只要加一個 site：`listen 443 ssl;` 配上憑證，
-> `location / { proxy_pass http://127.0.0.1:3000; }` 即可。
-
-### 4. 更新程式碼
+### 更新程式碼
 
 ```bash
 cd /opt/cc-birthday && git pull && sudo systemctl restart cc-birthday
@@ -105,15 +101,19 @@ npx netlify deploy --prod
 
 ## 發送通知給她
 
+**用後台網頁（最方便）**：打開 `https://你的網域/admin` → 輸入管理密碼 → 寫訊息 → 發送。
+
+**或用指令**：
+
 ```bash
 cd server
 node send.js "🎂 生日快樂！" "打開 App 有驚喜喔 💕"
 ```
 
-或用 curl：
+**或 curl**：
 
 ```bash
-curl -X POST https://cc-birthday-push.netlify.app/notify \
+curl -X POST https://你的網域/notify \
   -H "Content-Type: application/json" \
   -H "x-admin-key: <你的 ADMIN_KEY>" \
   -d '{"title":"🎂 生日快樂！","body":"打開 App 有驚喜喔 💕"}'

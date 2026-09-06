@@ -54,6 +54,14 @@ app.use(
 
 app.get('/health', (req, res) => res.send('CC birthday push server 💕'));
 
+// 管理後台 UI（頁面公開，但所有操作都需要 ADMIN_KEY）
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+
+app.get('/api/stats', (req, res) => {
+  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
+  res.json({ subscribers: loadSubs().length });
+});
+
 app.get('/vapidPublicKey', (req, res) => res.type('text/plain').send(VAPID_PUBLIC_KEY));
 
 // PWA 訂閱推播

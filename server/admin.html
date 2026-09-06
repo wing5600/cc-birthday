@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#1a0b2e" />
+<meta name="robots" content="noindex" />
+<title>💌 發通知給 CC</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100dvh; padding: 24px 16px;
+    background: radial-gradient(ellipse at 50% 20%, #2c1850 0%, #1a0b2e 60%, #0d0518 100%);
+    font-family: 'Noto Sans TC', sans-serif; color: #ffe9f4;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 {
+    font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 1.6rem;
+    margin: 12px 0 4px;
+    background: linear-gradient(135deg, #ffd6ec, #ff9ecb 40%, #ffd58a);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: #cbb8e8; font-size: .85rem; margin-bottom: 20px; }
+  .card {
+    width: 100%; max-width: 420px;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+    backdrop-filter: blur(10px); border-radius: 20px; padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  }
+  label { display: block; font-size: .85rem; color: #cbb8e8; margin: 14px 0 6px; }
+  input, textarea {
+    width: 100%; border: 1px solid rgba(255,255,255,.2); border-radius: 12px;
+    background: rgba(0,0,0,.25); color: #ffe9f4;
+    padding: 12px 14px; font-size: 1rem; font-family: inherit; outline: none;
+  }
+  input:focus, textarea:focus { border-color: #ff9ecb; }
+  textarea { resize: none; min-height: 90px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .chip {
+    border: 1px solid rgba(255,158,203,.4); border-radius: 999px;
+    background: rgba(255,158,203,.12); color: #ffd6ec;
+    padding: 8px 14px; font-size: .85rem; cursor: pointer; font-family: inherit;
+  }
+  .chip:active { transform: scale(.95); }
+  .btn {
+    width: 100%; margin-top: 20px; border: none; border-radius: 999px;
+    padding: 15px; font-size: 1.05rem; font-weight: 700; font-family: inherit;
+    color: #3a1b3d; background: linear-gradient(135deg, #ff9ecb, #ffd58a);
+    box-shadow: 0 6px 20px rgba(255,158,203,.35); cursor: pointer;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .5; }
+  #status { margin-top: 14px; font-size: .9rem; text-align: center; min-height: 1.4em; }
+  #status.ok { color: #7dffa8; }
+  #status.err { color: #ff8ab0; }
+  .stats { text-align: center; font-size: .85rem; color: #cbb8e8; margin-bottom: 4px; }
+  .logout { margin-top: 18px; font-size: .8rem; color: #8f7bb8; cursor: pointer; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<h1>💌 發通知給 CC</h1>
+<p class="sub">CC 生日快樂 · 推播管理後台</p>
+
+<div class="card" id="loginView">
+  <label for="keyInput">管理密碼（ADMIN_KEY）</label>
+  <input id="keyInput" type="password" placeholder="輸入密碼" autocomplete="current-password" />
+  <button class="btn" id="loginBtn">登入</button>
+</div>
+
+<div class="card hidden" id="mainView">
+  <p class="stats">📱 已訂閱裝置：<b id="subCount">–</b></p>
+
+  <label>快速訊息</label>
+  <div class="presets">
+    <button class="chip" data-t="🎂 生日快樂！" data-b="親愛的 CC，今天是屬於妳的日子 💕">🎂 生日快樂</button>
+    <button class="chip" data-t="🎁 有驚喜" data-b="快打開 App 看看喔 ✨">🎁 打開 App 有驚喜</button>
+    <button class="chip" data-t="💕 想妳" data-b="突然好想妳，就是這樣。">💕 想妳了</button>
+    <button class="chip" data-t="🌙 晚安" data-b="祝妳今晚有個甜甜的夢 🌟">🌙 晚安</button>
+  </div>
+
+  <label for="titleInput">標題</label>
+  <input id="titleInput" type="text" value="💕 給 CC" />
+
+  <label for="bodyInput">內容</label>
+  <textarea id="bodyInput" placeholder="想對她說的話…"></textarea>
+
+  <button class="btn" id="sendBtn">🚀 發送通知</button>
+  <p id="status"></p>
+  <p class="logout" id="logoutBtn">登出（清除密碼）</p>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const KEY_STORE = 'cc_admin_key';
+let adminKey = localStorage.getItem(KEY_STORE) || '';
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey, ...(options.headers || {}) }
+  });
+  if (res.status === 401) throw new Error('unauthorized');
+  return res;
+}
+
+async function enter() {
+  try {
+    const res = await api('/api/stats');
+    const data = await res.json();
+    localStorage.setItem(KEY_STORE, adminKey);
+    $('subCount').textContent = data.subscribers;
+    $('loginView').classList.add('hidden');
+    $('mainView').classList.remove('hidden');
+  } catch {
+    localStorage.removeItem(KEY_STORE);
+    $('loginView').classList.remove('hidden');
+    $('mainView').classList.add('hidden');
+    if (adminKey) alert('密碼錯誤或伺服器連線失敗');
+  }
+}
+
+$('loginBtn').addEventListener('click', () => {
+  adminKey = $('keyInput').value.trim();
+  enter();
+});
+$('keyInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') $('loginBtn').click();
+});
+
+document.querySelectorAll('.chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    $('titleInput').value = chip.dataset.t;
+    $('bodyInput').value = chip.dataset.b;
+  });
+});
+
+$('sendBtn').addEventListener('click', async () => {
+  const btn = $('sendBtn');
+  const status = $('status');
+  btn.disabled = true;
+  status.className = '';
+  status.textContent = '發送中…';
+  try {
+    const res = await api('/notify', {
+      method: 'POST',
+      body: JSON.stringify({ title: $('titleInput').value, body: $('bodyInput').value })
+    });
+    const data = await res.json();
+    status.className = 'ok';
+    status.textContent = `✅ 已送達 ${data.sent}/${data.total} 台裝置`;
+  } catch (e) {
+    status.className = 'err';
+    status.textContent = e.message === 'unauthorized' ? '❌ 密碼已失效，請重新登入' : '❌ 發送失敗，請稍後再試';
+    if (e.message === 'unauthorized') enter();
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem(KEY_STORE);
+  adminKey = '';
+  enter();
+});
+
+if (adminKey) enter();
+</script>
+</body>
+</html>

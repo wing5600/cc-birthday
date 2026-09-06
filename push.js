@@ -1,9 +1,7 @@
 // PWA 註冊 + 推播通知訂閱
-// 自有網域 All-in-One 部署時，前後端同網域，自動用 location.origin 免設定；
-// 若是從 GitHub Pages 開啟，才需要指定後端網址（把下面換成你的網域）
-const BACKEND_URL = location.hostname.endsWith('github.io')
-  ? 'https://cc.example.com'
-  : location.origin;
+// ⚠️ 後端部署完成後，把下面的網址換成你的網域（例如 https://cc.example.com）
+//    （在 GitHub 上直接編輯：https://github.com/wing5600/cc-birthday/edit/main/push.js）
+const BACKEND_URL = 'https://cc.example.com';
 
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =
