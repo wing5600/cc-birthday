@@ -21,8 +21,9 @@ push.js               PWA 註冊 + 推播訂閱
 sw.js                 Service Worker（離線快取 + 推播接收）
 manifest.webmanifest  PWA 設定
 icons/                App 圖示
-server/               推播後端（Node + Express + web-push）
-render.yaml           Render 一鍵部署設定
+server/               推播後端 - 本地開發版（Node + Express + web-push）
+netlify/functions/    推播後端 - 雲端版（Netlify Functions + Blobs）
+netlify.toml          Netlify 部署設定
 ```
 
 ## 部署前端（GitHub Pages）
@@ -34,21 +35,26 @@ gh api repos/{owner}/cc-birthday/pages -X POST -f "source[branch]=main" -f "sour
 
 網址會是 `https://<你的帳號>.github.io/cc-birthday/`
 
-## 部署後端（Render 免費方案）
+## 部署後端（Netlify 免費方案，免信用卡）
 
-1. 到 [render.com](https://render.com) 註冊（可用 GitHub 登入）
-2. Dashboard → **New → Blueprint** → 選 `cc-birthday` repo（會自動讀取 `render.yaml`）
-3. 建立時填入三個環境變數（值在 `server/.env` 裡）：
-   - `VAPID_PUBLIC_KEY`
-   - `VAPID_PRIVATE_KEY`
-   - `ADMIN_KEY`
-4. 部署完成後會得到網址，例如 `https://cc-birthday-push.onrender.com`
-5. 把這個網址填進：
+後端是三支 Netlify Functions（`netlify/functions/`）+ Netlify Blobs 存訂閱資料：
+
+1. 到 [netlify.com](https://www.netlify.com) 用 **GitHub 登入**（免費、不用信用卡）
+2. 在本專案目錄執行：
+   ```bash
+   npx netlify login                     # 瀏覽器授權
+   npx netlify sites:create --name cc-birthday-push
+   npx netlify env:set VAPID_PUBLIC_KEY "（server/.env 裡的值）"
+   npx netlify env:set VAPID_PRIVATE_KEY "（server/.env 裡的值）"
+   npx netlify env:set ADMIN_KEY "（server/.env 裡的值）"
+   npx netlify deploy --prod
+   ```
+3. 得到網址 `https://cc-birthday-push.netlify.app` 後，填進：
    - `push.js` 最上面的 `BACKEND_URL`（改完 commit + push，GitHub Pages 會自動更新）
    - `server/.env` 的 `BACKEND_URL`（本機發通知用）
 
-> 免費方案閒置會休眠，第一次發通知可能等 30–60 秒喚醒，屬正常現象。
-> 訂閱資料存在後端記憶體碟，重開機會遺失——但 PWA 每次打開都會自動重新訂閱，所以她只要開過 App 就會補上。
+> 訂閱資料存在 Netlify Blobs，不會因休眠遺失；PWA 每次打開也會自動重新訂閱補上。
+> `server/` 裡的 Express 版本是本地開發用的替代方案，雲端用 Netlify Functions 即可。
 
 ## CC 的 iPhone 設定（iOS 16.4 以上）
 
@@ -67,7 +73,7 @@ node send.js "🎂 生日快樂！" "打開 App 有驚喜喔 💕"
 或用 curl：
 
 ```bash
-curl -X POST https://cc-birthday-push.onrender.com/notify \
+curl -X POST https://cc-birthday-push.netlify.app/notify \
   -H "Content-Type: application/json" \
   -H "x-admin-key: <你的 ADMIN_KEY>" \
   -d '{"title":"🎂 生日快樂！","body":"打開 App 有驚喜喔 💕"}'

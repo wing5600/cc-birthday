@@ -1,0 +1,21 @@
+[build]
+  publish = "backend-public"
+
+[functions]
+  directory = "netlify/functions"
+
+# 讓 API 路徑跟原本後端一致：https://<site>.netlify.app/vapidPublicKey 等
+[[redirects]]
+  from = "/vapidPublicKey"
+  to = "/.netlify/functions/vapidPublicKey"
+  status = 200
+
+[[redirects]]
+  from = "/subscribe"
+  to = "/.netlify/functions/subscribe"
+  status = 200
+
+[[redirects]]
+  from = "/notify"
+  to = "/.netlify/functions/notify"
+  status = 200
