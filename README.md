@@ -46,7 +46,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/wing5600/cc-birthday/main/se
 ```
 
 自動完成：程式碼放到 `/www/wwwroot/cc-birthday` → 安裝依賴 → 產生金鑰 →
-**systemd 啟動後端（port 3000，開機自啟）** → 顯示**管理密碼**。
+**systemd 啟動後端（port 3456，開機自啟）** → 顯示**管理密碼**。
 
 ### 2. Cloudflare 加 DNS 紀錄
 
@@ -58,7 +58,7 @@ CF Dashboard → DNS → Add record：類型 `A`、名稱例如 `cc`、IPv4 填�
 ### 3. aaPanel 加反向代理
 
 「網站」→ 新增該子網域的網站 → 網站設定 →「反向代理」→ 新增 →
-目標 URL 填 `http://127.0.0.1:3000` → 儲存。
+目標 URL 填 `http://127.0.0.1:3456` → 儲存。
 
 ### 4. 驗證
 
@@ -164,5 +164,5 @@ curl -X POST https://你的網域/notify \
 python3 -m http.server 8080   # 打開 http://localhost:8080
 
 # 後端
-cd server && npm install && npm start   # http://localhost:3000
+cd server && npm install && npm start   # http://localhost:3456
 ```

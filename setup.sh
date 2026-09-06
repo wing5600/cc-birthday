@@ -16,7 +16,7 @@ err()  { printf '\033[1;31m[錯誤]\033[0m %s\n' "$*" >&2; }
 
 REPO="https://github.com/wing5600/cc-birthday.git"
 APP_DIR="/opt/cc-birthday"
-PORT=3000
+PORT=3456
 
 # ---------- aaPanel 偵測 ----------
 if [ -d /www/server/panel ]; then

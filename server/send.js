@@ -14,7 +14,7 @@ try {
   }
 } catch {}
 
-const BACKEND_URL = (process.env.BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+const BACKEND_URL = (process.env.BACKEND_URL || 'http://localhost:3456').replace(/\/$/, '');
 const ADMIN_KEY = process.env.ADMIN_KEY;
 
 if (!ADMIN_KEY) {

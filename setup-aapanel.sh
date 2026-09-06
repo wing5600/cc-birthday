@@ -4,7 +4,7 @@
 #  一條指令完成：clone 程式碼、安裝依賴、產生金鑰、systemd 啟動
 #  剩下的只有兩個網頁操作：
 #    1. Cloudflare 加 DNS 紀錄（橘雲 = 自動 SSL）
-#    2. aaPanel 加反向代理 → 127.0.0.1:3000
+#    2. aaPanel 加反向代理 → 127.0.0.1:3456
 #
 #  用法（SSH 登入伺服器後）：
 #    bash <(curl -fsSL https://raw.githubusercontent.com/wing5600/cc-birthday/main/setup-aapanel.sh)
@@ -18,7 +18,7 @@ err()  { printf '\033[1;31m[錯誤]\033[0m %s\n' "$*" >&2; }
 
 REPO="https://github.com/wing5600/cc-birthday.git"
 APP_DIR="/www/wwwroot/cc-birthday"
-PORT=3000
+PORT=3456
 
 # ---------- 權限 ----------
 if [ "$(id -u)" -ne 0 ]; then
