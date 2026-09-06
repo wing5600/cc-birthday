@@ -1,0 +1,19 @@
+{
+  "name": "cc-birthday-push",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CC 生日 PWA 推播後端",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "send": "node send.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

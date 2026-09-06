@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#1a0b2e" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="CC生日快樂" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="icons/icon-192.png" />
+<title>CC ♥ 生日快樂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    position: fixed; inset: 0; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 28%, #2c1850 0%, #1a0b2e 55%, #0d0518 100%);
+    font-family: 'Noto Sans TC', sans-serif;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+  #ui {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: calc(env(safe-area-inset-top, 0px) + 22px) 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+  }
+  header { text-align: center; }
+  h1 {
+    font-family: 'Noto Serif TC', serif; font-weight: 900;
+    font-size: clamp(2rem, 9vw, 4.2rem); letter-spacing: .08em;
+    background: linear-gradient(135deg, #ffd6ec 0%, #ff9ecb 30%, #ffd58a 65%, #fff3c9 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 20px rgba(255, 158, 203, .45));
+    animation: floaty 4s ease-in-out infinite;
+  }
+  .subtitle {
+    margin-top: 8px; color: #e9d5ff; opacity: .9;
+    font-size: clamp(.85rem, 3.6vw, 1.1rem); letter-spacing: .35em; text-indent: .35em;
+  }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  .fade-up { opacity: 0; transform: translateY(20px); animation: fadeUp .9s ease forwards; }
+  .d1 { animation-delay: .3s; } .d2 { animation-delay: .8s; } .d3 { animation-delay: 1.3s; } .d4 { animation-delay: 1.7s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  footer { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .card {
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .16);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-radius: 18px; padding: 14px 20px; max-width: 360px;
+    color: #ffe9f4; font-size: .92rem; line-height: 1.8; text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+  }
+  .buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    pointer-events: auto; cursor: pointer; border: none; border-radius: 999px;
+    padding: 12px 20px; font-family: 'Noto Sans TC', sans-serif; font-weight: 700; font-size: .95rem;
+    color: #3a1b3d; background: linear-gradient(135deg, #ffc2e0, #ffd58a);
+    box-shadow: 0 6px 20px rgba(255, 158, 203, .35);
+    transition: transform .15s ease;
+  }
+  .btn:active { transform: scale(.93); }
+  .hint { color: #cbb8e8; opacity: .75; font-size: .78rem; letter-spacing: .12em; }
+
+  #wish {
+    position: absolute; top: 36%; left: 50%;
+    transform: translate(-50%, -50%) scale(.7);
+    font-family: 'Noto Serif TC', serif; font-weight: 900; white-space: nowrap;
+    font-size: clamp(1.3rem, 6vw, 2.4rem); color: #fff6d9;
+    text-shadow: 0 0 26px rgba(255, 213, 138, .9), 0 0 60px rgba(255, 158, 203, .5);
+    opacity: 0; transition: opacity .6s ease, transform .6s ease; pointer-events: none;
+  }
+  #wish.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  #intro {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    background: radial-gradient(ellipse at 50% 35%, #341c5c 0%, #1a0b2e 60%, #0d0518 100%);
+    transition: opacity .9s ease; text-align: center; padding: 24px;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  .cake-emoji { font-size: 76px; animation: bounce 2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.06); } }
+  #intro h2 {
+    font-family: 'Noto Serif TC', serif; font-weight: 900; color: #ffe9f4;
+    font-size: clamp(1.4rem, 6.5vw, 2.2rem); letter-spacing: .1em; line-height: 1.6;
+  }
+  #intro p { color: #cbb8e8; font-size: .95rem; letter-spacing: .2em; }
+  #startBtn {
+    margin-top: 8px; cursor: pointer; border: none; border-radius: 999px;
+    padding: 16px 38px; font-family: 'Noto Sans TC', sans-serif; font-weight: 700; font-size: 1.1rem;
+    color: #3a1b3d; background: linear-gradient(135deg, #ff9ecb, #ffd58a);
+    box-shadow: 0 0 34px rgba(255, 158, 203, .55);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 22px rgba(255,158,203,.45); transform: scale(1); }
+    50% { box-shadow: 0 0 44px rgba(255,158,203,.8); transform: scale(1.05); }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="ui">
+  <header>
+    <h1 class="fade-up d1">CC，生日快樂！</h1>
+    <p class="subtitle fade-up d2">九月七日 ♡ 屬於妳的日子</p>
+  </header>
+
+  <div id="wish">🌟 許個願吧，願望都會成真 🌟</div>
+
+  <footer>
+    <div class="card fade-up d3">
+      親愛的 CC：<br />
+      願妳新的一歲，被幸福與溫柔包圍，<br />
+      所有的美好都如期而至，<br />
+      所有的願望都一一實現。<br />
+      謝謝妳出現在我的生命裡 ——<br />
+      生日快樂，我最愛的妳 💕
+    </div>
+    <div class="buttons fade-up d4">
+      <button class="btn" id="fwBtn">🎆 放煙火</button>
+      <button class="btn" id="blowBtn">🕯️ 吹蠟燭許願</button>
+      <button class="btn" id="musicBtn">🎵 音樂開</button>
+      <button class="btn" id="bellBtn">🔔 開啟通知</button>
+    </div>
+    <p class="hint fade-up d4">拖曳旋轉蛋糕 ・ 輕觸畫面放煙火</p>
+  </footer>
+</div>
+
+<div id="intro">
+  <div class="cake-emoji">🎂</div>
+  <h2>有一份驚喜<br />要送給最愛的 CC</h2>
+  <p>2026 ・ 九月七日</p>
+  <button id="startBtn">💝 點我開啟</button>
+</div>
+
+<script src="push.js" defer></script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x1a0b2e, 26, 80);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(0, 9, 26);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 2.6, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.enablePan = false;
+controls.minDistance = 6;
+controls.maxDistance = 22;
+controls.maxPolarAngle = Math.PI * 0.55;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.7;
+
+// ---------- textures ----------
+function radialTexture(stops, size = 128) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  for (const [o, c] of stops) g.addColorStop(o, c);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const glowTex = radialTexture([[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(255,240,200,0.9)'], [0.6, 'rgba(255,180,120,0.35)'], [1, 'rgba(255,160,80,0)']]);
+const softTex = radialTexture([[0, 'rgba(255,255,255,1)'], [0.4, 'rgba(255,255,255,0.5)'], [1, 'rgba(255,255,255,0)']]);
+
+function makeHeartTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(64, 102);
+  ctx.bezierCurveTo(18, 70, 16, 30, 45, 25);
+  ctx.bezierCurveTo(58, 23, 64, 34, 64, 44);
+  ctx.bezierCurveTo(64, 34, 70, 23, 83, 25);
+  ctx.bezierCurveTo(112, 30, 110, 70, 64, 102);
+  ctx.fill();
+  const t = new THREE.CanvasTexture(cv);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const heartTex = makeHeartTexture();
+
+// ---------- lights ----------
+scene.add(new THREE.AmbientLight(0x8a6bbf, 0.55));
+const dirLight = new THREE.DirectionalLight(0xffe6f2, 1.5);
+dirLight.position.set(7, 14, 9);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.left = -10;
+dirLight.shadow.camera.right = 10;
+dirLight.shadow.camera.top = 10;
+dirLight.shadow.camera.bottom = -10;
+dirLight.shadow.camera.near = 2;
+dirLight.shadow.camera.far = 40;
+scene.add(dirLight);
+const rimLight = new THREE.PointLight(0xff77cc, 40, 45, 2);
+rimLight.position.set(-8, 6, -8);
+scene.add(rimLight);
+const candleLight = new THREE.PointLight(0xffa64d, 26, 16, 2);
+candleLight.position.set(0, 5.0, 0);
+scene.add(candleLight);
+
+// ---------- ground ----------
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(45, 64),
+  new THREE.MeshStandardMaterial({ color: 0x241340, roughness: 0.9 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const glowPad = new THREE.Mesh(
+  new THREE.CircleGeometry(7, 48),
+  new THREE.MeshBasicMaterial({ map: softTex, color: 0xff9ecb, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false })
+);
+glowPad.rotation.x = -Math.PI / 2;
+glowPad.position.y = 0.02;
+scene.add(glowPad);
+
+// ---------- cake ----------
+const cake = new THREE.Group();
+scene.add(cake);
+
+const creamMat = new THREE.MeshStandardMaterial({ color: 0xfff6ee, roughness: 0.5 });
+const pinkMat1 = new THREE.MeshStandardMaterial({ color: 0xffb7d5, roughness: 0.55 });
+const pinkMat2 = new THREE.MeshStandardMaterial({ color: 0xff9ecb, roughness: 0.55 });
+const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd58a, metalness: 0.85, roughness: 0.3 });
+
+const plate = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.7, 0.18, 64), creamMat);
+plate.position.y = 0.09;
+plate.castShadow = plate.receiveShadow = true;
+cake.add(plate);
+const plateRim = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.045, 12, 80), goldMat);
+plateRim.rotation.x = Math.PI / 2;
+plateRim.position.y = 0.18;
+cake.add(plateRim);
+
+function addTier(r, h, bottom, mat) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 64), mat);
+  m.position.y = bottom + h / 2;
+  m.castShadow = m.receiveShadow = true;
+  cake.add(m);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(r - 0.02, 0.11, 14, 72), creamMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = bottom + h;
+  ring.castShadow = true;
+  cake.add(ring);
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    const drip = new THREE.Mesh(new THREE.SphereGeometry(0.09 + Math.random() * 0.05, 10, 10), creamMat);
+    drip.position.set(Math.cos(a) * (r - 0.02), bottom + h - 0.12 - Math.random() * 0.15, Math.sin(a) * (r - 0.02));
+    drip.scale.y = 1.6;
+    cake.add(drip);
+  }
+  return bottom + h;
+}
+
+let top = 0.18;
+const tier1Top = addTier(2.55, 1.35, top, pinkMat1);
+const tier2Top = addTier(1.85, 1.1, tier1Top, creamMat);
+top = addTier(1.2, 0.95, tier2Top, pinkMat2);
+
+for (let i = 0; i < 12; i++) {
+  const a = (i / 12) * Math.PI * 2;
+  const d = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), creamMat);
+  d.position.set(Math.cos(a) * 2.2, tier1Top + 0.03, Math.sin(a) * 2.2);
+  d.scale.y = 0.75;
+  d.castShadow = true;
+  cake.add(d);
+}
+
+const strawberryMat = new THREE.MeshStandardMaterial({ color: 0xff4d6d, roughness: 0.35 });
+const leafMat = new THREE.MeshStandardMaterial({ color: 0x5ac86e, roughness: 0.6 });
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * Math.PI * 2 + 0.3;
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), strawberryMat);
+  body.scale.set(1, 1.15, 1);
+  body.castShadow = true;
+  const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.12, 8), leafMat);
+  leaf.position.y = 0.2;
+  g.add(body, leaf);
+  g.position.set(Math.cos(a) * 1.55, tier2Top + 0.14, Math.sin(a) * 1.55);
+  cake.add(g);
+}
+
+for (let i = 0; i < 10; i++) {
+  const a = (i / 10) * Math.PI * 2;
+  const d = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 12), creamMat);
+  d.position.set(Math.cos(a) * 1.0, top + 0.02, Math.sin(a) * 1.0);
+  d.scale.y = 0.8;
+  d.castShadow = true;
+  cake.add(d);
+}
+
+// candles + flames
+const flames = [];
+const candleColors = [0xff6fb5, 0xffd166, 0x7ae0ff, 0xb18cff, 0xff8a5c];
+for (let i = 0; i < 5; i++) {
+  const a = (i / 5) * Math.PI * 2 + Math.PI / 2;
+  const x = Math.cos(a) * 0.68, z = Math.sin(a) * 0.68;
+  const stick = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.055, 0.7, 12),
+    new THREE.MeshStandardMaterial({ color: candleColors[i], roughness: 0.4 })
+  );
+  stick.position.set(x, top + 0.35, z);
+  stick.castShadow = true;
+  cake.add(stick);
+  const flame = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex, color: 0xffc966, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  flame.position.set(x, top + 0.86, z);
+  flame.scale.set(0.32, 0.48, 1);
+  cake.add(flame);
+  flames.push(flame);
+}
+
+// golden "CC" on the front of the bottom tier
+new FontLoader().load(
+  'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/fonts/helvetiker_bold.typeface.json',
+  (font) => {
+    const geo = new TextGeometry('CC', {
+      font, size: 0.62, height: 0.14, curveSegments: 8,
+      bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3
+    });
+    geo.center();
+    const txt = new THREE.Mesh(geo, goldMat);
+    txt.position.set(0, 0.86, 2.56);
+    txt.castShadow = true;
+    cake.add(txt);
+  },
+  undefined,
+  () => {}
+);
+
+// ---------- balloons ----------
+const balloons = [];
+const balloonColors = [0xff9ecb, 0xffd58a, 0xb18cff, 0x7ae0ff, 0x7dffa8, 0xff8ab0];
+function resetBalloon(g, initial = false) {
+  const r = 6.5 + Math.random() * 5;
+  const a = Math.random() * Math.PI * 2;
+  g.position.set(Math.cos(a) * r, initial ? Math.random() * 14 - 2 : -2.5, Math.sin(a) * r);
+}
+for (let i = 0; i < 8; i++) {
+  const g = new THREE.Group();
+  const col = balloonColors[i % balloonColors.length];
+  const b = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 24, 24),
+    new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.15 })
+  );
+  b.scale.set(1, 1.18, 1);
+  b.castShadow = true;
+  const knot = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.14, 10), new THREE.MeshStandardMaterial({ color: col }));
+  knot.position.y = -0.68;
+  knot.rotation.x = Math.PI;
+  const lineGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, -0.74, 0), new THREE.Vector3(0.06, -1.4, 0), new THREE.Vector3(0, -2.1, 0)
+  ]);
+  const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 }));
+  g.add(b, knot, line);
+  resetBalloon(g, true);
+  scene.add(g);
+  balloons.push({ g, speed: 0.35 + Math.random() * 0.4, phase: Math.random() * Math.PI * 2 });
+}
+
+// ---------- confetti ----------
+const CONFETTI = 240;
+const confetti = new THREE.InstancedMesh(
+  new THREE.PlaneGeometry(0.13, 0.2),
+  new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+  CONFETTI
+);
+const confettiData = [];
+const palette = [0xff9ecb, 0xffd58a, 0xb18cff, 0x7ae0ff, 0x7dffa8, 0xff6f91, 0xfff3c9];
+const dummy = new THREE.Object3D();
+const tmpColor = new THREE.Color();
+for (let i = 0; i < CONFETTI; i++) {
+  confettiData.push({
+    x: (Math.random() - 0.5) * 26, y: Math.random() * 20, z: (Math.random() - 0.5) * 26,
+    rx: Math.random() * 4 + 2, ry: Math.random() * 4 + 2,
+    fall: 1.1 + Math.random() * 1.4, phase: Math.random() * Math.PI * 2
+  });
+  confetti.setColorAt(i, tmpColor.setHex(palette[i % palette.length]));
+}
+confetti.instanceColor.needsUpdate = true;
+scene.add(confetti);
+
+// ---------- stars & magic dust ----------
+const starGeo = new THREE.BufferGeometry();
+const starPos = new Float32Array(700 * 3);
+for (let i = 0; i < 700; i++) {
+  const r = 55 + Math.random() * 35;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+  starPos[i * 3 + 1] = Math.abs(r * Math.cos(phi)) * 0.9 + 1;
+  starPos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
+  color: 0xfff6ff, size: 0.5, map: softTex, transparent: true,
+  opacity: 0.85, depthWrite: false, sizeAttenuation: true
+}));
+scene.add(stars);
+
+const dustGeo = new THREE.BufferGeometry();
+const dustPos = new Float32Array(90 * 3);
+for (let i = 0; i < 90; i++) {
+  const r = 2 + Math.random() * 3.5;
+  const a = Math.random() * Math.PI * 2;
+  dustPos[i * 3] = Math.cos(a) * r;
+  dustPos[i * 3 + 1] = 0.5 + Math.random() * 5.5;
+  dustPos[i * 3 + 2] = Math.sin(a) * r;
+}
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  color: 0xffd58a, size: 0.14, map: softTex, transparent: true,
+  opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false
+}));
+scene.add(dust);
+
+// ---------- fireworks ----------
+const fireworks = [];
+const fwColors = [0xff6fb5, 0xffd166, 0x7ae0ff, 0xb18cff, 0x7dffa8, 0xff8a5c];
+function spawnFirework(pos, colorHex) {
+  const count = 130;
+  const geo = new THREE.BufferGeometry();
+  const arr = new Float32Array(count * 3);
+  const vels = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    arr[i * 3] = pos.x; arr[i * 3 + 1] = pos.y; arr[i * 3 + 2] = pos.z;
+    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    const sp = 3.2 + Math.random() * 3.8;
+    vels[i * 3] = Math.sin(ph) * Math.cos(th) * sp;
+    vels[i * 3 + 1] = Math.cos(ph) * sp;
+    vels[i * 3 + 2] = Math.sin(ph) * Math.sin(th) * sp;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const mat = new THREE.PointsMaterial({
+    color: colorHex, size: 0.22, map: glowTex, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  const p = new THREE.Points(geo, mat);
+  scene.add(p);
+  fireworks.push({ p, vels, life: 1 });
+}
+function randomFirework() {
+  spawnFirework(
+    new THREE.Vector3((Math.random() - 0.5) * 18, 6.5 + Math.random() * 6, -3 - Math.random() * 7),
+    fwColors[Math.floor(Math.random() * fwColors.length)]
+  );
+}
+
+// ---------- hearts burst ----------
+const hearts = [];
+function spawnHearts(point, n = 10) {
+  const geo = new THREE.BufferGeometry();
+  const arr = new Float32Array(n * 3);
+  const vels = new Float32Array(n * 3);
+  const cols = new Float32Array(n * 3);
+  const c = new THREE.Color();
+  const heartCols = [0xff6fb5, 0xff9ecb, 0xff4d6d, 0xffd1e8];
+  for (let i = 0; i < n; i++) {
+    arr[i * 3] = point.x; arr[i * 3 + 1] = point.y; arr[i * 3 + 2] = point.z;
+    vels[i * 3] = (Math.random() - 0.5) * 2.2;
+    vels[i * 3 + 1] = 1.2 + Math.random() * 1.6;
+    vels[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+    c.setHex(heartCols[i % heartCols.length]);
+    cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.55, map: heartTex, transparent: true, vertexColors: true, depthWrite: false });
+  const p = new THREE.Points(geo, mat);
+  scene.add(p);
+  hearts.push({ p, vels, life: 1 });
+}
+
+// ---------- candle smoke ----------
+const smokes = [];
+function spawnSmoke(pos) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: softTex, color: 0xbbbbcc, transparent: true, opacity: 0.55, depthWrite: false
+  }));
+  s.position.copy(pos);
+  s.scale.set(0.3, 0.3, 1);
+  scene.add(s);
+  smokes.push({ s, life: 1 });
+}
+
+// ---------- music (WebAudio 生日快樂歌) ----------
+let audioCtx = null, masterGain = null, musicOn = false, musicTimer = null;
+const beat = 0.42;
+const melody = [
+  ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2],
+  ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2],
+  ['G4', .75], ['G4', .25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2],
+  ['F5', .75], ['F5', .25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 2]
+];
+function noteFreq(n) {
+  const m = n.match(/^([A-G])(#|b)?(\d)$/);
+  const semis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  let s = semis[m[1]];
+  if (m[2] === '#') s++;
+  if (m[2] === 'b') s--;
+  const midi = (parseInt(m[3]) + 1) * 12 + s;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+function ensureCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.9;
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playNote(f, t, d) {
+  const o = audioCtx.createOscillator();
+  o.type = 'triangle';
+  o.frequency.value = f;
+  const o2 = audioCtx.createOscillator();
+  o2.type = 'sine';
+  o2.frequency.value = f * 2;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.24, t + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d * 0.95);
+  const g2 = audioCtx.createGain();
+  g2.gain.value = 0.25;
+  o.connect(g);
+  o2.connect(g2);
+  g2.connect(g);
+  g.connect(masterGain);
+  o.start(t); o.stop(t + d);
+  o2.start(t); o2.stop(t + d);
+}
+function scheduleLoop() {
+  if (!musicOn) return;
+  let t = audioCtx.currentTime + 0.08;
+  const t0 = t;
+  for (const [n, b] of melody) {
+    const d = b * beat;
+    playNote(noteFreq(n), t, d);
+    t += d;
+  }
+  musicTimer = setTimeout(scheduleLoop, (t - t0 + 1.4) * 1000);
+}
+const musicBtn = document.getElementById('musicBtn');
+function setMusic(on) {
+  musicOn = on;
+  musicBtn.textContent = on ? '🎵 音樂開' : '🔇 音樂關';
+  if (on) { ensureCtx(); scheduleLoop(); }
+  else clearTimeout(musicTimer);
+}
+musicBtn.addEventListener('click', () => setMusic(!musicOn));
+
+// ---------- interactions ----------
+document.getElementById('fwBtn').addEventListener('click', () => {
+  randomFirework();
+  setTimeout(randomFirework, 250);
+  setTimeout(randomFirework, 500);
+});
+
+let lit = true;
+const blowBtn = document.getElementById('blowBtn');
+const wishEl = document.getElementById('wish');
+blowBtn.addEventListener('click', () => {
+  if (lit) {
+    lit = false;
+    flames.forEach((f) => { f.visible = false; spawnSmoke(f.position); });
+    wishEl.classList.add('show');
+    setTimeout(() => wishEl.classList.remove('show'), 3600);
+    blowBtn.textContent = '🕯️ 再點亮蠟燭';
+  } else {
+    lit = true;
+    flames.forEach((f) => { f.visible = true; });
+    blowBtn.textContent = '🕯️ 吹蠟燭許願';
+  }
+});
+
+let downX = 0, downY = 0, downT = 0;
+canvas.addEventListener('pointerdown', (e) => {
+  downX = e.clientX; downY = e.clientY; downT = performance.now();
+});
+canvas.addEventListener('pointerup', (e) => {
+  if (Math.hypot(e.clientX - downX, e.clientY - downY) < 12 && performance.now() - downT < 350) {
+    randomFirework();
+    const ndc = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(ndc, camera);
+    spawnHearts(ray.ray.at(9, new THREE.Vector3()), 8);
+  }
+});
+
+// ---------- intro ----------
+let started = false, introT = 0;
+const camFrom = new THREE.Vector3(0, 9, 26);
+const camTo = new THREE.Vector3(0, 5.2, 13.5);
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('intro').classList.add('hide');
+  started = true;
+  setMusic(true);
+  setTimeout(randomFirework, 600);
+  setTimeout(randomFirework, 1400);
+  setTimeout(randomFirework, 2200);
+});
+
+// ---------- main loop ----------
+const clock = new THREE.Clock();
+let fwTimer = 0, nextFw = 3;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = Math.min(clock.getDelta(), 0.05);
+  const time = clock.elapsedTime;
+
+  if (started && introT < 1) {
+    introT = Math.min(1, introT + delta / 2.2);
+    const e = 1 - Math.pow(1 - introT, 3);
+    camera.position.lerpVectors(camFrom, camTo, e);
+  }
+
+  controls.update();
+
+  flames.forEach((f, i) => {
+    if (!f.visible) return;
+    f.scale.set(
+      0.32 * (1 + Math.sin(time * 13 + i * 1.7) * 0.18),
+      0.48 * (1 + Math.sin(time * 17 + i * 2.3) * 0.22),
+      1
+    );
+  });
+  candleLight.intensity = lit ? 26 + Math.sin(time * 21) * 5 + Math.sin(time * 7.3) * 3 : 2;
+
+  for (const b of balloons) {
+    b.g.position.y += b.speed * delta;
+    b.g.position.x += Math.sin(time + b.phase) * delta * 0.35;
+    b.g.rotation.z = Math.sin(time * 0.8 + b.phase) * 0.06;
+    if (b.g.position.y > 16) resetBalloon(b.g);
+  }
+
+  for (let i = 0; i < CONFETTI; i++) {
+    const d = confettiData[i];
+    d.y -= d.fall * delta;
+    d.x += Math.sin(time * 1.6 + d.phase) * delta * 0.7;
+    if (d.y < 0.05) {
+      d.y = 18 + Math.random() * 4;
+      d.x = (Math.random() - 0.5) * 26;
+      d.z = (Math.random() - 0.5) * 26;
+    }
+    dummy.position.set(d.x, d.y, d.z);
+    dummy.rotation.set(time * d.rx + d.phase, time * d.ry, d.phase);
+    dummy.updateMatrix();
+    confetti.setMatrixAt(i, dummy.matrix);
+  }
+  confetti.instanceMatrix.needsUpdate = true;
+
+  stars.rotation.y = time * 0.005;
+  dust.rotation.y = time * 0.15;
+  dust.material.opacity = 0.55 + Math.sin(time * 2) * 0.25;
+
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    const f = fireworks[i];
+    f.life -= delta * 0.55;
+    const pos = f.p.geometry.attributes.position;
+    const drag = Math.pow(0.45, delta);
+    for (let j = 0; j < pos.count; j++) {
+      f.vels[j * 3 + 1] -= 3.4 * delta;
+      f.vels[j * 3] *= drag;
+      f.vels[j * 3 + 1] *= drag;
+      f.vels[j * 3 + 2] *= drag;
+      pos.array[j * 3] += f.vels[j * 3] * delta;
+      pos.array[j * 3 + 1] += f.vels[j * 3 + 1] * delta;
+      pos.array[j * 3 + 2] += f.vels[j * 3 + 2] * delta;
+    }
+    pos.needsUpdate = true;
+    f.p.material.opacity = Math.max(f.life, 0);
+    if (f.life <= 0) {
+      scene.remove(f.p);
+      f.p.geometry.dispose();
+      f.p.material.dispose();
+      fireworks.splice(i, 1);
+    }
+  }
+
+  for (let i = hearts.length - 1; i >= 0; i--) {
+    const h = hearts[i];
+    h.life -= delta * 0.7;
+    const pos = h.p.geometry.attributes.position;
+    for (let j = 0; j < pos.count; j++) {
+      h.vels[j * 3 + 1] += 0.4 * delta;
+      pos.array[j * 3] += h.vels[j * 3] * delta;
+      pos.array[j * 3 + 1] += h.vels[j * 3 + 1] * delta;
+      pos.array[j * 3 + 2] += h.vels[j * 3 + 2] * delta;
+    }
+    pos.needsUpdate = true;
+    h.p.material.opacity = Math.max(h.life, 0);
+    if (h.life <= 0) {
+      scene.remove(h.p);
+      h.p.geometry.dispose();
+      h.p.material.dispose();
+      hearts.splice(i, 1);
+    }
+  }
+
+  for (let i = smokes.length - 1; i >= 0; i--) {
+    const sm = smokes[i];
+    sm.life -= delta * 0.8;
+    sm.s.position.y += delta * 0.9;
+    const sc = sm.s.scale.x + delta * 0.8;
+    sm.s.scale.set(sc, sc, 1);
+    sm.s.material.opacity = 0.55 * Math.max(sm.life, 0);
+    if (sm.life <= 0) {
+      scene.remove(sm.s);
+      sm.s.material.dispose();
+      smokes.splice(i, 1);
+    }
+  }
+
+  if (started) {
+    fwTimer += delta;
+    if (fwTimer > nextFw) {
+      fwTimer = 0;
+      nextFw = 2.2 + Math.random() * 2.2;
+      randomFirework();
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

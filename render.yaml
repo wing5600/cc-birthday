@@ -1,0 +1,16 @@
+# Render Blueprint：在 Render Dashboard → New → Blueprint 選這個 repo 即可自動建立後端服務
+services:
+  - type: web
+    name: cc-birthday-push
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: ADMIN_KEY
+        sync: false
