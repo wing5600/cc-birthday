@@ -17,9 +17,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    position: fixed; inset: 0; overflow: hidden;
-    background: radial-gradient(ellipse at 50% 28%, #2c1850 0%, #1a0b2e 55%, #0d0518 100%);
+  html {
+    height: 100%;
+    background-color: #1a0b2e; /* 底部安全區等任何縫隙都保持深色，不露白 */
+  }
+  body {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    background-color: #1a0b2e;
+    background-image: radial-gradient(ellipse at 50% 28%, #2c1850 0%, #1a0b2e 55%, #0d0518 100%);
     font-family: 'Noto Sans TC', sans-serif;
     user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   }
@@ -82,7 +88,8 @@
   #intro {
     position: fixed; inset: 0; z-index: 10;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-    background: radial-gradient(ellipse at 50% 35%, #341c5c 0%, #1a0b2e 60%, #0d0518 100%);
+    background-color: #1a0b2e;
+    background-image: radial-gradient(ellipse at 50% 35%, #341c5c 0%, #1a0b2e 60%, #0d0518 100%);
     transition: opacity .9s ease; text-align: center; padding: 24px;
   }
   #intro.hide { opacity: 0; pointer-events: none; }
