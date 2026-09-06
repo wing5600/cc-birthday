@@ -1,5 +1,4 @@
-# 把 cc.example.com 換成你的網域
-# Caddy 會自動申請 + 續期 Let's Encrypt HTTPS 憑證
-cc.example.com {
+# 備用：若之後想用 Caddy 自動 HTTPS，直接用這個檔案即可
+panel.sunhingindo.com {
 	reverse_proxy 127.0.0.1:3000
 }

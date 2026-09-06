@@ -1,7 +1,6 @@
 // PWA 註冊 + 推播通知訂閱
-// ⚠️ 後端部署完成後，把下面的網址換成你的網域（例如 https://cc.example.com）
-//    （在 GitHub 上直接編輯：https://github.com/wing5600/cc-birthday/edit/main/push.js）
-const BACKEND_URL = 'https://cc.example.com';
+// 後端網址（自有伺服器）
+const BACKEND_URL = 'https://panel.sunhingindo.com';
 
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isStandalone =

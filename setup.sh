@@ -97,36 +97,43 @@ $SUDO systemctl daemon-reload
 $SUDO systemctl enable --now cc-birthday
 $SUDO systemctl restart cc-birthday
 
-# ---------- 7. Caddy（自動 HTTPS） ----------
-if ! command -v caddy >/dev/null 2>&1; then
-  info "安裝 Caddy"
-  if command -v apt-get >/dev/null 2>&1; then
-    $SUDO apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
-      | $SUDO gpg --yes --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' \
-      | $SUDO tee /etc/apt/sources.list.d/caddy-stable.list >/dev/null
-    $SUDO apt-get update -qq
-    $SUDO apt-get install -y -qq caddy
-  else
-    err "請先手動安裝 Caddy：https://caddyserver.com/docs/install"; exit 1
+# ---------- 7. HTTPS / 反向代理 ----------
+echo
+read -rp "要安裝 Caddy 自動處理 HTTPS 嗎？（伺服器上已有 Nginx/面板管理 SSL 的話選 n）[y/N]: " USE_CADDY
+if [ "${USE_CADDY:-n}" = "y" ] || [ "${USE_CADDY:-n}" = "Y" ]; then
+  if ! command -v caddy >/dev/null 2>&1; then
+    info "安裝 Caddy"
+    if command -v apt-get >/dev/null 2>&1; then
+      $SUDO apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
+        | $SUDO gpg --yes --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' \
+        | $SUDO tee /etc/apt/sources.list.d/caddy-stable.list >/dev/null
+      $SUDO apt-get update -qq
+      $SUDO apt-get install -y -qq caddy
+    else
+      err "請先手動安裝 Caddy：https://caddyserver.com/docs/install"; exit 1
+    fi
   fi
-fi
 
-info "設定 Caddy 反向代理（$DOMAIN → 127.0.0.1:$PORT）"
-if [ -f /etc/caddy/Caddyfile ] && grep -q "$DOMAIN" /etc/caddy/Caddyfile; then
-  ok "Caddyfile 已包含 $DOMAIN，略過"
-elif [ -f /etc/caddy/Caddyfile ]; then
-  $SUDO cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak.$(date +%Y%m%d%H%M%S)"
-  printf '\n%s {\n\treverse_proxy 127.0.0.1:%s\n}\n' "$DOMAIN" "$PORT" \
-    | $SUDO tee -a /etc/caddy/Caddyfile >/dev/null
-  ok "已把 $DOMAIN 附加到現有 Caddyfile（原檔已備份）"
+  info "設定 Caddy 反向代理（$DOMAIN → 127.0.0.1:$PORT）"
+  if [ -f /etc/caddy/Caddyfile ] && grep -q "$DOMAIN" /etc/caddy/Caddyfile; then
+    ok "Caddyfile 已包含 $DOMAIN，略過"
+  elif [ -f /etc/caddy/Caddyfile ]; then
+    $SUDO cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.bak.$(date +%Y%m%d%H%M%S)"
+    printf '\n%s {\n\treverse_proxy 127.0.0.1:%s\n}\n' "$DOMAIN" "$PORT" \
+      | $SUDO tee -a /etc/caddy/Caddyfile >/dev/null
+    ok "已把 $DOMAIN 附加到現有 Caddyfile（原檔已備份）"
+  else
+    printf '%s {\n\treverse_proxy 127.0.0.1:%s\n}\n' "$DOMAIN" "$PORT" \
+      | $SUDO tee /etc/caddy/Caddyfile >/dev/null
+    ok "Caddyfile 已建立"
+  fi
+  $SUDO systemctl reload caddy 2>/dev/null || $SUDO systemctl restart caddy
 else
-  printf '%s {\n\treverse_proxy 127.0.0.1:%s\n}\n' "$DOMAIN" "$PORT" \
-    | $SUDO tee /etc/caddy/Caddyfile >/dev/null
-  ok "Caddyfile 已建立"
+  warn "跳過 Caddy。請記得在你的面板 / Nginx 設定："
+  echo "      https://$DOMAIN  →  反向代理到  http://127.0.0.1:$PORT （需啟用 SSL）"
 fi
-$SUDO systemctl reload caddy 2>/dev/null || $SUDO systemctl restart caddy
 
 # ---------- 8. 防火牆 ----------
 if command -v ufw >/dev/null 2>&1 && $SUDO ufw status 2>/dev/null | grep -q "Status: active"; then
